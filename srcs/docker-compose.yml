@@ -2,16 +2,15 @@ services:
   nginx:
     build: requirements/nginx/.
     container_name: nginx
-    ports:
-      - "8080:80"
-
-  mariadb:
-    build: requirements/mariadb/.
-    container_name: mariadb
     env_file: .env
-    secrets:
-      - db_root_password
-      - db_password
+    ports:
+      - "443:443"
+    volumes:
+      - wp_files:/var/www/html/wordpress
+    networks:
+      - inception
+    depends_on:
+      - wordpress
     restart: on-failure
 
   wordpress:
@@ -22,9 +21,44 @@ services:
       - db_password
       - wp_admin_password
       - wp_user_password
+    volumes:
+      - wp_files:/var/www/html/wordpress
+    networks:
+      - inception
     depends_on:
       - mariadb
     restart: on-failure
+
+  mariadb:
+    build: requirements/mariadb/.
+    container_name: mariadb
+    env_file: .env
+    secrets:
+      - db_root_password
+      - db_password
+    volumes:
+      - wp_database:/var/lib/mysql
+    networks:
+      - inception
+    restart: on-failure
+
+networks:
+  inception:
+    driver: bridge
+
+volumes:
+  wp_files:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/swied/data/wordpress
+  wp_database:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/swied/data/mariadb
 
 secrets:
   db_root_password:
