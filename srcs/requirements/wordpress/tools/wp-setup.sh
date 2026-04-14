@@ -43,6 +43,8 @@ if [ ! -f "$WP_PATH/wp-config.php" ]; then
         --user_pass="$WP_USER_PASSWORD" \
         --path="$WP_PATH" \
         --allow-root
+
+    chown -R www-data:www-data "$WP_PATH"
 fi
 
 # Start php-fpm in foreground
