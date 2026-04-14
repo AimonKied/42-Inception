@@ -4,3 +4,18 @@ services:
     container_name: nginx
     ports:
       - "8080:80"
+
+  mariadb:
+    build: requirements/mariadb/.
+    container_name: mariadb
+    env_file: .env
+    secrets:
+      - db_root_password
+      - db_password
+    restart: on-failure
+
+secrets:
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_password:
+    file: ../secrets/db_password.txt
