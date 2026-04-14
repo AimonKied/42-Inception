@@ -18,8 +18,8 @@ RUN curl -o /usr/local/bin/wp https://raw.githubusercontent.com/wp-cli/builds/gh
 # php-fpm: listen on TCP port 9000 instead of socket
 RUN sed -i 's|listen = .*|listen = 9000|' /etc/php/8.2/fpm/pool.d/www.conf
 
-# WordPress root
-RUN mkdir -p /var/www/html/wordpress \
+# WordPress root + php-fpm run dir
+RUN mkdir -p /var/www/html/wordpress /run/php \
     && chown -R www-data:www-data /var/www/html
 
 COPY tools/wp-setup.sh /usr/local/bin/
