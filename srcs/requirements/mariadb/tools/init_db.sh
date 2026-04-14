@@ -17,19 +17,19 @@ fi
 
 # Starting temporary server (no networking for setup)
 echo "Starting temporary MariaDB server for setup..."
-mysqld --skip-networking --socket=/run/mysqld/mysqld.sock --user=mysql &
+mysqld --skip-networking --socket=/var/run/mysqld/mysqld.sock --user=mysql &
 pid="$!"
 
 # Wait for MariaDB to be ready
 echo "Waiting for MariaDB to be ready..."
-until mysqladmin --socket=/run/mysqld/mysqld.sock ping >/dev/null 2>&1; do
+until mysqladmin --socket=/var/run/mysqld/mysqld.sock ping >/dev/null 2>&1; do
     sleep 1
 done
 echo "MariaDB is ready!"
 
 # Run setup SQL: create database and users
 echo "Running setup SQL..."
-mysql --socket=/run/mysqld/mysqld.sock -u root << EOF
+mysql --socket=/var/run/mysqld/mysqld.sock -u root << EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
 CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
 CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
@@ -39,11 +39,11 @@ EOF
 
 # Shut down temporary server
 echo "Shutting down temporary MariaDB..."
-mysqladmin --socket=/run/mysqld/mysqld.sock -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
+mysqladmin --socket=/var/run/mysqld/mysqld.sock -u root -p"${MYSQL_ROOT_PASSWORD}" shutdown
 
 # Wait for shutdown
 wait "$pid" || true
 
 # Start MariaDB normally (with networking)
 echo "Initialization complete. Starting MariaDB..."
-exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock
+exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/var/run/mysqld/mysqld.sock
